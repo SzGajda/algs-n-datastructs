@@ -7,5 +7,5 @@ public interface PriorityQueue<T> {
     boolean remove(T element);
     boolean update(T oldElement, T newElement);
     int size();
-    boolean contains();
+    boolean contains(T element);
 }

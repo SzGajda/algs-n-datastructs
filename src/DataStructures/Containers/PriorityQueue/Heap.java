@@ -1,13 +1,27 @@
 package DataStructures.Containers.PriorityQueue;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Heap<T extends Comparable<T>> implements PriorityQueue<T>{
 
     private static int DEFAULT_BRANCHING_DEGREE = 2; //default number of children per node
-    public static int branchingDegree;
+    public int branchingDegree;
 
     private List<T> elements;
+
+    public Heap(){
+        this.elements = new ArrayList<>();
+        this.branchingDegree = DEFAULT_BRANCHING_DEGREE;
+    }
+    public Heap(int branchingDegree){
+        if (branchingDegree < 2){
+            throw new IllegalArgumentException("Branching degree of a heap should be no smaller than 2. Provided value: " + branchingDegree);
+        }
+        this.elements = new ArrayList<>();
+        this.branchingDegree = branchingDegree;
+
+    }
 
     private void bubbleUp(){
         bubbleUp(size()-1);
@@ -28,14 +42,13 @@ public class Heap<T extends Comparable<T>> implements PriorityQueue<T>{
     private int getHighestPriorityChild(int index){
         int child = getFirstChild(index);
         T childNode = elements.get(child);
-        for (int i=getFirstChild(index); i<getLastChild(index); i++){
+        for (int i=getFirstChild(index)+1; i<=getLastChild(index); i++){
             T compChild = elements.get(i);
             if(compChild.compareTo(childNode)>0){
-                childNode = compChild;
-
+                child = i;
             }
         }
-        return 1;
+        return child;
     }
 
     private void bubbleUp(int index){
@@ -55,46 +68,94 @@ public class Heap<T extends Comparable<T>> implements PriorityQueue<T>{
     }
 
     private void pushDown(int index){
-//        while (index < size()){
-//            for (int i = getFirstChild(index); i <= getLastChild(index); i++){
-//
-//            }
-//        }
+        T node = elements.get(index);
 
+        while (index < size()){
+            int child = getHighestPriorityChild(index);
+            T childNode = elements.get(child);
+            if (childNode.compareTo(node) > 0){
+                elements.set(index,childNode);
+                index = child;
+            } else {
+                break;
+            }
+        }
+        elements.set(index, node);
     }
 
     @Override
     public T top() {
-        return null;
+        if(elements.isEmpty()){
+            return null;
+        }
+        T node = elements.get(0);
+        remove(node);
+        if(!elements.isEmpty()){
+            int last = elements.size()-1;
+            T lastNode = elements.get(last);
+            elements.set(0,lastNode);
+            elements.remove(last);
+            pushDown();
+        }
+        return node;
     }
 
     @Override
     public T peek() {
-        return null;
+        return elements.get(0);
     }
 
     @Override
     public boolean insert(T element) {
-        return false;
+        if (elements.contains(element)){
+            return false;
+        } else {
+            int index = elements.size();
+            elements.add(index,element);
+            bubbleUp(index);
+            return true;
+        }
     }
 
     @Override
     public boolean remove(T element) {
-        return false;
+        if (elements.isEmpty() | !elements.contains(element)){
+            return false;
+        }
+        int i = elements.indexOf(element);
+        int n = elements.size();
+        if (i == elements.size()-1){ //if last leaf
+            elements.remove(element);
+        } else {
+
+        }
+
+        return true;
     }
 
     @Override
     public boolean update(T oldElement, T newElement) {
-        return false;
+        if (!elements.contains(oldElement)){
+            return false;
+        } else {
+            int i = elements.indexOf(oldElement);
+            elements.set(i,newElement);
+            if(oldElement.compareTo(newElement)>0){
+                pushDown(i);
+            } else {
+                bubbleUp(i);
+            }
+        }
+        return true;
     }
 
     @Override
     public int size() {
-        return 0;
+        return elements.size();
     }
 
     @Override
-    public boolean contains() {
-        return false;
+    public boolean contains(T element) {
+        return elements.contains(element);
     }
 }
